@@ -117,7 +117,7 @@ void main (int argc, char **argv)
 	int source = -1 ; /* 0=puits, 1=source */
 	int protocole = 0; /* 0=TCP, 1=UDP*/
 	int lg_msg = 30; /*Taille des messages setup à 30 octets*/
-	while ((c = getopt(argc, argv, "pnul:s")) != -1) {
+	while ((c = getopt(argc, argv, "pusl:n:")) != -1) {
 		switch (c) {
 		case 'p':
 			if (source == 1) {
