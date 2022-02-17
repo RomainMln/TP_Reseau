@@ -27,7 +27,6 @@ void construire_message(char * message,char motif, int lg)
 void afficher_message(char *message, int lg, int num_message, int emmeteur) 
 {
 	int i;
-	printf("message construit : ");
 	if (emmeteur == 1)
 	{
 		printf("SOURCE: Envoi n°%d (%d) [----%d",num_message,lg,num_message);
@@ -76,7 +75,7 @@ void socket_S_UDP(int port, char * HostName, int nb_message, int lg_message )
 			printf("Erreur lors de l'envoie de message\n");
 			exit(1);
 		}
-		afficher_message(message,lg_envoie,k,1);
+		afficher_message(message,lg_envoie,k+1,1);
 	}
 
 	close(socket_local);
@@ -122,7 +121,7 @@ void socket_S_TCP(int port, char * HostName, int nb_message, int lg_message)
 			printf("Erreur lors de l'envoie de message\n");
 			exit(1);
 		}
-		afficher_message(message,lg_envoie,k,1);
+		afficher_message(message,lg_envoie,k+1,1);
 	}
 
 	close(socket_local);
