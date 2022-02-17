@@ -190,8 +190,8 @@ void socket_P_TCP(int port, int lg_message)
 		printf("Erreur lors du listen\n");
 		exit(1);
 	}
-	
-	if (socket_bis = accept(socket_local,addr_source,&lg_addr_source)==-1)
+
+	if ((socket_bis = accept(socket_local,addr_source,&lg_addr_source))==-1)
 	{
 		printf("Erreur lors de l'accept\n");
 		exit(1);
