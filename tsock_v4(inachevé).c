@@ -202,36 +202,52 @@ void socket_P_TCP(int port, int lg_message)
 		exit(1);
 	}
 
-	if (listen(socket_local,1) == -1)
+	if (listen(socket_local,5) == -1)
 	{
 		printf("Erreur lors du listen\n");
 		exit(1);
 	}
 
-	if ((socket_bis = accept(socket_local,addr_source,&lg_addr_source))==-1)
-	{
-		printf("Erreur lors de l'accept\n");
-		exit(1);
-	}
+
 
 	while(1)
 	{
-		lg_effective = read(socket_bis,message,lg_message);
-		if (lg_effective == -1)
+		if ((socket_bis = accept(socket_local,addr_source,&lg_addr_source))==-1)
 		{
-			printf("Erreur lors du read\n");
+			printf("Erreur lors de l'accept\n");
 			exit(1);
 		}
-		if (lg_effective == 0)
-		{
-			break;
-		}
-		afficher_message(message,lg_effective,i,0);
-		i++;
-	}
 
-	close(socket_bis);
-	close(socket_local);
+		switch (fork() ) 
+		{
+			case - 1 : /* il y a une erreur */
+				printf("erreur fork\n") ; 
+				exit(1) ;
+			case 0 : /* on est dans le proc. fils */
+				close(socket_local) ; /* fermeture socket du proc. père */
+				while(1) 
+				{
+					lg_effective = read(socket_bis,message,lg_message);
+					if (lg_effective == -1)
+					{
+						printf("Erreur lors du read\n");
+						exit(1);
+					}
+					if (lg_effective == 0)
+					{
+						break;
+					}
+					afficher_message(message,lg_effective,i,0);
+					i++;
+				}
+				exit(0);
+			default : /* on est dans le processus père*/
+				close(sock_bis) ; /* fermeture socket du proc. fils */
+				
+
+		}
+
+	}
 }
 
 void main (int argc, char **argv)
