@@ -242,7 +242,7 @@ void socket_P_TCP(int port, int lg_message)
 				}
 				exit(0);
 			default : /* on est dans le processus père*/
-				close(sock_bis) ; /* fermeture socket du proc. fils */
+				close(socket_bis) ; /* fermeture socket du proc. fils */
 				
 
 		}
