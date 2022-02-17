@@ -24,6 +24,23 @@ void construire_message(char * message,char motif, int lg)
 	for(i=0;i<lg;i++) message[i]=motif;
 }
 
+void afficher_message(char *message, int lg, int num_message, int emmeteur) 
+{
+	int i;
+	if (emmeteur == 1)
+	{
+		printf("SOURCE: Envoi n°%d (%d) [----%d",num_message,lg,num_message);
+		for (i=0;i<lg;i++) printf("%c", message[i]); 
+		printf("]\n");
+	}
+	else if (emmeteur == 0)
+	{
+		printf("PUITS: Envoi n°%d (%d) [----%d",num_message,lg,num_message);
+		for (i=0;i<lg;i++) printf("%c", message[i]); 
+		printf("]\n");
+	}
+}
+
 void socket_S_UDP(int port, char * HostName, int nb_message, int lg_message )
 {
 	int k;
@@ -57,6 +74,7 @@ void socket_S_UDP(int port, char * HostName, int nb_message, int lg_message )
 			printf("Erreur lors de l'envoie de message\n");
 			exit(1);
 		}
+		afficher_message(message,lg_message,k+1,1);
 	}
 
 	close(socket_local);
@@ -64,6 +82,7 @@ void socket_S_UDP(int port, char * HostName, int nb_message, int lg_message )
 
 void socket_S_TCP(int port, char * HostName, int nb_message, int lg_message)
 {
+	int k;
 	int socket_local = socket(AF_INET,SOCK_STREAM,0);
 	struct sockaddr_in addr_distant;
 	struct hostent * hp = gethostbyname(HostName);
@@ -86,7 +105,7 @@ void socket_S_TCP(int port, char * HostName, int nb_message, int lg_message)
 	}
 	memcpy((char*)&(addr_distant.sin_addr.s_addr),hp->h_addr,hp->h_length);
 
-	if (connect(socket_local,&addr_distant,lg_addr_dest)==-1)
+	if (connect(socket_local,(struct sockaddr *)&addr_distant,lg_addr_dest)==-1)
 	{
 		printf("Erreur lors du connect\n");
 		exit(1);
@@ -100,18 +119,14 @@ void socket_S_TCP(int port, char * HostName, int nb_message, int lg_message)
 			printf("Erreur lors de l'envoie de message\n");
 			exit(1);
 		}
+		afficher_message(message,lg_message,k+1,1);
 	}
 
 	close(socket_local);
 }
 
 
-void afficher_message(char *message, int lg) 
-{
-	int i;
-	printf("message construit : ");
-	for (i=0;i<lg;i++) printf("%c", message[i]); printf("\n");
-}
+
 
 
 void socket_P_UDP(int port, int lg_message)
@@ -122,7 +137,8 @@ void socket_P_UDP(int port, int lg_message)
 	char * message = calloc(lg_message,sizeof(char));
 	struct sockaddr * addr_source = calloc(1,sizeof(struct sockaddr));
 	int lg_effective;
-	int lg_addr_source;
+	int lg_addr_source = sizeof(addr_source);
+	int i = 1;
 
 	if (socket_local==-1)
 	{
@@ -149,7 +165,8 @@ void socket_P_UDP(int port, int lg_message)
 			printf("Erreur recvfrom");
 			exit(1);
 		}
-		afficher_message(message,lg_effective);
+		afficher_message(message,lg_effective,i,0);
+		i++;
 	}
 	
 	close(socket_local);
@@ -158,13 +175,13 @@ void socket_P_UDP(int port, int lg_message)
 void socket_P_TCP(int port, int lg_message)
 {
 	int socket_local = socket(AF_INET,SOCK_STREAM,0);
-	int socket_bis
+	int socket_bis;
 	struct sockaddr_in addr_local;
 	int lg_addr_local=sizeof(addr_local);
 	char * message = calloc(lg_message,sizeof(char));
 	struct sockaddr * addr_source = calloc(1,sizeof(struct sockaddr));
 	int lg_effective;
-	int lg_addr_source;
+	int lg_addr_source = sizeof(addr_source);
 
 
 	if (socket_local==-1)
@@ -177,6 +194,7 @@ void socket_P_TCP(int port, int lg_message)
 	addr_local.sin_family = AF_INET;
 	addr_local.sin_port = port;
 	addr_local.sin_addr.s_addr = INADDR_ANY;
+	int i=1;
 
 	if (bind(socket_local,(struct sockaddr *) &addr_local, lg_addr_local) == -1)
 	{
@@ -184,7 +202,13 @@ void socket_P_TCP(int port, int lg_message)
 		exit(1);
 	}
 
-	if (socket_bis = accept(socket_local,addr_source,&lg_addr_source)==-1)
+	if (listen(socket_local,1) == -1)
+	{
+		printf("Erreur lors du listen\n");
+		exit(1);
+	}
+
+	if ((socket_bis = accept(socket_local,addr_source,&lg_addr_source))==-1)
 	{
 		printf("Erreur lors de l'accept\n");
 		exit(1);
@@ -192,13 +216,18 @@ void socket_P_TCP(int port, int lg_message)
 
 	while(1)
 	{
-		lg_effective = read(scoket_bis,message,lg_message);
+		lg_effective = read(socket_bis,message,lg_message);
 		if (lg_effective == -1)
 		{
 			printf("Erreur lors du read\n");
 			exit(1);
 		}
-		afficher_message(message,lg_effective);
+		if (lg_effective == 0)
+		{
+			break;
+		}
+		afficher_message(message,lg_effective,i,0);
+		i++;
 	}
 
 	close(socket_bis);
@@ -274,9 +303,17 @@ void main (int argc, char **argv)
 	{
 		socket_S_UDP(atoi(argv[argc-1]),argv[argc-2],nb_message,lg_msg);
 	}
+	else if (source==1 && protocole==0)
+	{
+		socket_S_TCP(atoi(argv[argc-1]),argv[argc-2],nb_message,lg_msg);
+	}
 	else if (source==0 && protocole==1)
 	{
 		socket_P_UDP(atoi(argv[argc-1]),lg_msg);
+	}
+	else if (source==0 && protocole==0)
+	{
+		socket_P_TCP(atoi(argv[argc-1]),lg_msg);
 	}
 }
 
