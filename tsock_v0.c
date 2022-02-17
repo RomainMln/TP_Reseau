@@ -64,6 +64,7 @@ void socket_S_UDP(int port, char * HostName, int nb_message, int lg_message )
 
 void socket_S_TCP(int port, char * HostName, int nb_message, int lg_message)
 {
+	int k;
 	int socket_local = socket(AF_INET,SOCK_STREAM,0);
 	struct sockaddr_in addr_distant;
 	struct hostent * hp = gethostbyname(HostName);
@@ -86,7 +87,7 @@ void socket_S_TCP(int port, char * HostName, int nb_message, int lg_message)
 	}
 	memcpy((char*)&(addr_distant.sin_addr.s_addr),hp->h_addr,hp->h_length);
 
-	if (connect(socket_local,&addr_distant,lg_addr_dest)==-1)
+	if (connect(socket_local,(struct sockaddr *)&addr_distant,lg_addr_dest)==-1)
 	{
 		printf("Erreur lors du connect\n");
 		exit(1);
@@ -158,7 +159,7 @@ void socket_P_UDP(int port, int lg_message)
 void socket_P_TCP(int port, int lg_message)
 {
 	int socket_local = socket(AF_INET,SOCK_STREAM,0);
-	int socket_bis
+	int socket_bis;
 	struct sockaddr_in addr_local;
 	int lg_addr_local=sizeof(addr_local);
 	char * message = calloc(lg_message,sizeof(char));
@@ -192,7 +193,7 @@ void socket_P_TCP(int port, int lg_message)
 
 	while(1)
 	{
-		lg_effective = read(scoket_bis,message,lg_message);
+		lg_effective = read(socket_bis,message,lg_message);
 		if (lg_effective == -1)
 		{
 			printf("Erreur lors du read\n");
