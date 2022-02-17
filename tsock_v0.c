@@ -165,7 +165,7 @@ void socket_P_TCP(int port, int lg_message)
 	char * message = calloc(lg_message,sizeof(char));
 	struct sockaddr * addr_source = calloc(1,sizeof(struct sockaddr));
 	int lg_effective;
-	int lg_addr_source;
+	int lg_addr_source = sizeof(addr_source);
 
 
 	if (socket_local==-1)
