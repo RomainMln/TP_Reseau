@@ -275,9 +275,17 @@ void main (int argc, char **argv)
 	{
 		socket_S_UDP(atoi(argv[argc-1]),argv[argc-2],nb_message,lg_msg);
 	}
+	else if (source==1 && protocole==0)
+	{
+		socket_S_TCP(atoi(argv[argc-1]),argv[argc-2],nb_message,lg_msg)
+	}
 	else if (source==0 && protocole==1)
 	{
 		socket_P_UDP(atoi(argv[argc-1]),lg_msg);
+	}
+	else if (source==0 && protocole==0)
+	{
+		socket_P_TCP(atoi(argv[argc-1]),lg_msg)
 	}
 }
 
