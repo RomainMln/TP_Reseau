@@ -49,7 +49,6 @@ void socket_S_UDP(int port, char * HostName, int nb_message, int lg_message )
 	struct hostent * hp = gethostbyname(HostName);
 	char * message = calloc(lg_message,sizeof(char));
 	int lg_addr_dest=sizeof(addr_distant);
-	int lg_envoie;
 
 	if (socket_local==-1)
 	{
@@ -70,12 +69,12 @@ void socket_S_UDP(int port, char * HostName, int nb_message, int lg_message )
 	for (k=0;k<nb_message;k++)
 	{
 		construire_message(message,'a'+k%26,lg_message);
-		if (lg_envoie = sendto(socket_local,message,lg_message,0,(struct sockaddr *)&addr_distant,lg_addr_dest))
+		if (sendto(socket_local,message,lg_message,0,(struct sockaddr *)&addr_distant,lg_addr_dest))
 		{
 			printf("Erreur lors de l'envoie de message\n");
 			exit(1);
 		}
-		afficher_message(message,lg_envoie,k+1,1);
+		afficher_message(message,lg_message,k+1,1);
 	}
 
 	close(socket_local);
@@ -89,7 +88,6 @@ void socket_S_TCP(int port, char * HostName, int nb_message, int lg_message)
 	struct hostent * hp = gethostbyname(HostName);
 	char * message = calloc(lg_message,sizeof(char));
 	int lg_addr_dest=sizeof(addr_distant);
-	int lg_envoie;
 
 	if (socket_local==-1)
 	{
@@ -116,12 +114,12 @@ void socket_S_TCP(int port, char * HostName, int nb_message, int lg_message)
 	for (k=0;k<nb_message;k++)
 	{
 		construire_message(message,'a'+k%26,lg_message);
-		if (lg_envoie = write(socket_local,message,lg_message)==-1)
+		if (write(socket_local,message,lg_message)==-1)
 		{
 			printf("Erreur lors de l'envoie de message\n");
 			exit(1);
 		}
-		afficher_message(message,lg_envoie,k+1,1);
+		afficher_message(message,lg_message,k+1,1);
 	}
 
 	close(socket_local);
